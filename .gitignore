@@ -3,3 +3,6 @@
 
 # build folders
 build*
+
+# conan presets
+CMakeUserPresets.json
