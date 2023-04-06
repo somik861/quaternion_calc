@@ -10,6 +10,9 @@ namespace q {
 template <typename T>
 class Vector3 {
   public:
+	constexpr Vector3(T x, T y, T z) : _values(x, y, z) {}
+	constexpr Vector3(T xyz) : Vector3(xyz, xyz, xyz) {}
+
 	constexpr T& x() { return _values[0]; }
 	constexpr T x() const { return _values[0]; }
 
@@ -32,8 +35,8 @@ class Vector3 {
 	constexpr friend bool operator==(const Vector3& lhs, const Vector3& rhs) {
 		using details::isclose;
 
-		return isclose(lhs.x(), rhs.x()) && &&isclose(lhs.y(), rhs.y()) &&
-		       isclose(lhs.z(), rhs.z())
+		return isclose(lhs.x(), rhs.x()) && isclose(lhs.y(), rhs.y()) &&
+		       isclose(lhs.z(), rhs.z());
 	}
 
   private:
