@@ -8,9 +8,4 @@
 
 using floatTypes = std::tuple<float, double>;
 
-template <q::details::concepts::Streamable T>
-std::string to_string(T elem) {
-	std::stringstream ss;
-	ss << elem;
-	return ss.str();
-}
+using q::details::to_string;

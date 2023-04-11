@@ -16,7 +16,7 @@ auto test_vec = [](auto& vec, auto x, auto y, auto z) {
 	REQUIRE(z == _z);
 };
 
-TEMPLATE_LIST_TEST_CASE("Vector3", "[construtor][template]", floatTypes) {
+TEMPLATE_LIST_TEST_CASE("Vector3", "Vector3[template]", floatTypes) {
 	TestType _xyz = 1.f;
 	q::Vector3 one_val(_xyz);
 
