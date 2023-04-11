@@ -4,7 +4,9 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <format>
 #include <functional>
+#include <ostream>
 
 namespace q {
 template <typename T>
@@ -37,6 +39,11 @@ class Vector3 {
 
 		return isclose(lhs.x(), rhs.x()) && isclose(lhs.y(), rhs.y()) &&
 		       isclose(lhs.z(), rhs.z());
+	}
+
+	constexpr friend std::ostream& operator<<(std::ostream& os,
+	                                          const Vector3& v) {
+		return os << std::format("[{}, {}, {}]", v.x(), v.y(), v.z());
 	}
 
   private:
