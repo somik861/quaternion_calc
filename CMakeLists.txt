@@ -5,8 +5,11 @@ project(quaternion_calc CXX)
 
 # Boost
 find_package(Boost CONFIG REQUIRED)
-set(LIBS Boost::program_options Boost::container)
+set(LIBS ${LIBS} Boost::program_options Boost::container)
 
+# FMT
+find_package(fmt CONFIG REQUIRED)
+set(LIBS ${LIBS} fmt::fmt)
 
 add_executable(q_calc src/main.cpp)
 target_link_libraries(q_calc ${LIBS})
