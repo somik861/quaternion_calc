@@ -1,54 +1,44 @@
 #include "../src/quaternion/vector3.hpp"
-#include <catch2/catch_template_test_macros.hpp>
-#include <catch2/catch_test_macros.hpp>
-#include <tuple>
+#include "common.hxx"
+#include <format>
 
-using floatTypes = std::tuple<float, double>;
+auto test_vec = [](auto& vec, auto x, auto y, auto z) {
+	auto _x = vec.x();
+	auto _y = vec.y();
+	auto _z = vec.z();
 
-TEMPLATE_LIST_TEST_CASE("Constructors", "[construtor][template]", floatTypes) {
-	SECTION("One-value c'tor") {
-		TestType val = 1.f;
-		q::Vector3 vec(val);
+	REQUIRE(std::is_same_v<decltype(_x), decltype(x)>);
+	REQUIRE(std::is_same_v<decltype(_y), decltype(y)>);
+	REQUIRE(std::is_same_v<decltype(_z), decltype(z)>);
 
-		auto x = vec.x();
-		auto y = vec.y();
-		auto z = vec.z();
+	REQUIRE(x == _x);
+	REQUIRE(y == _y);
+	REQUIRE(z == _z);
+};
 
-		REQUIRE(std::is_same_v<decltype(x), TestType>);
-		REQUIRE(std::is_same_v<decltype(y), TestType>);
-		REQUIRE(std::is_same_v<decltype(z), TestType>);
+TEMPLATE_LIST_TEST_CASE("Vector3", "[construtor][template]", floatTypes) {
+	TestType _xyz = 1.f;
+	q::Vector3 one_val(_xyz);
 
-		REQUIRE(x == val);
-		REQUIRE(y == val);
-		REQUIRE(z == val);
-	}
+	SECTION("One-value c'tor") { test_vec(one_val, _xyz, _xyz, _xyz); }
 
-	SECTION("Three-value c'tor") {
-		TestType val_x = 1.f, val_y = 2.f, val_z = 3.f;
-		q::Vector3 vec(val_x, val_y, val_z);
-
-		auto x = vec.x();
-		auto y = vec.y();
-		auto z = vec.z();
-
-		REQUIRE(std::is_same_v<decltype(x), TestType>);
-		REQUIRE(std::is_same_v<decltype(y), TestType>);
-		REQUIRE(std::is_same_v<decltype(z), TestType>);
-
-		REQUIRE(x == val_x);
-		REQUIRE(y == val_y);
-		REQUIRE(z == val_z);
-	}
+	TestType _x = 1.f, _y = 2.f, _z = 3.f;
+	q::Vector3 three_val(_x, _y, _z);
+	SECTION("Three-value c'tor") { test_vec(three_val, _x, _y, _z); }
 
 	SECTION("C'tor equality") {
-		TestType val = 1.f;
+		REQUIRE(one_val == q::Vector3(_xyz, _xyz, _xyz));
+	}
 
-		q::Vector3 vec_a(val, val, val);
-		q::Vector3 vec_b(val);
+	SECTION("Indexing") {
+		test_vec(one_val, one_val[0], one_val[1], one_val[2]);
+		test_vec(three_val, three_val[0], three_val[1], three_val[2]);
+	}
 
-		REQUIRE(vec_a.x() == vec_b.x());
-		REQUIRE(vec_a.y() == vec_b.y());
-		REQUIRE(vec_a.z() == vec_b.z());
-		REQUIRE(vec_a == vec_b);
+	SECTION("String representation") {
+		REQUIRE(to_string(one_val) ==
+		        std::format("[{}, {}, {}]", _xyz, _xyz, _xyz));
+		REQUIRE(to_string(three_val) ==
+		        std::format("[{}, {}, {}]", _x, _y, _z));
 	}
 }
