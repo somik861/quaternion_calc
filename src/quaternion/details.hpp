@@ -13,4 +13,11 @@ template <std::integral T>
 bool isclose(T a, T b) {
 	return a == b;
 }
+
+template <concepts::Streamable T>
+std::string to_string(T elem) {
+	std::stringstream ss;
+	ss << elem;
+	return ss.str();
+}
 } // namespace q::details
