@@ -25,7 +25,8 @@ class Quaternion {
 
 	constexpr friend std::ostream& operator<<(std::ostream& os,
 	                                          const Quaternion& q) {
-		return os << std::format("Q({}, {})", q.real(), details::to_string(q.imag()));
+		return os << fmt::format("Q({}, {})", q.real(),
+		                         details::to_string(q.imag()));
 	}
 
   private:
