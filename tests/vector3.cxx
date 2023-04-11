@@ -1,6 +1,6 @@
 #include "../src/quaternion/vector3.hpp"
 #include "common.hxx"
-#include <format>
+#include <fmt/core.h>
 
 auto test_vec = [](auto& vec, auto x, auto y, auto z) {
 	auto _x = vec.x();
@@ -37,8 +37,8 @@ TEMPLATE_LIST_TEST_CASE("Vector3", "Vector3[template]", floatTypes) {
 
 	SECTION("String representation") {
 		REQUIRE(to_string(one_val) ==
-		        std::format("[{}, {}, {}]", _xyz, _xyz, _xyz));
+		        fmt::format("[{}, {}, {}]", _xyz, _xyz, _xyz));
 		REQUIRE(to_string(three_val) ==
-		        std::format("[{}, {}, {}]", _x, _y, _z));
+		        fmt::format("[{}, {}, {}]", _x, _y, _z));
 	}
 }

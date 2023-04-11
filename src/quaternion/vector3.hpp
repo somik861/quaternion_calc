@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <format>
+#include <fmt/core.h>
 #include <functional>
 #include <ostream>
 
@@ -43,7 +43,7 @@ class Vector3 {
 
 	constexpr friend std::ostream& operator<<(std::ostream& os,
 	                                          const Vector3& v) {
-		return os << std::format("[{}, {}, {}]", v.x(), v.y(), v.z());
+		return os << fmt::format("[{}, {}, {}]", v.x(), v.y(), v.z());
 	}
 
   private:

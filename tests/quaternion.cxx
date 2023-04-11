@@ -1,6 +1,6 @@
 #include "../src/quaternion/quaternion.hpp"
 #include "common.hxx"
-#include <format>
+#include <fmt/core.h>
 
 auto test_quat = [](auto& quat, auto x, auto vec) {
 	auto _x = quat.real();
@@ -30,8 +30,8 @@ TEMPLATE_LIST_TEST_CASE("Quaternion", "Quaternion[template]", floatTypes) {
 
 	SECTION("String representation") {
 		REQUIRE(to_string(_scal_quat) ==
-		        std::format("Q({}, {})", _real, to_string(_imag)));
+		        fmt::format("Q({}, {})", _real, to_string(_imag)));
 		REQUIRE(to_string(_vec_quat) ==
-		        std::format("Q({}, {})", _real, to_string(_imag)));
+		        fmt::format("Q({}, {})", _real, to_string(_imag)));
 	}
 }
