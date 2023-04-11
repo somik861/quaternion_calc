@@ -12,7 +12,7 @@ namespace q {
 template <typename T>
 class Vector3 {
   public:
-	constexpr Vector3(T x, T y, T z) : _values(x, y, z) {}
+	constexpr Vector3(T x, T y, T z) : _values{x, y, z} {}
 	constexpr Vector3(T xyz) : Vector3(xyz, xyz, xyz) {}
 
 	constexpr T& x() { return _values[0]; }
