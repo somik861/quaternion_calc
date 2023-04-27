@@ -43,12 +43,12 @@ TEMPLATE_LIST_TEST_CASE("Vector3", "Vector3[template]", floatTypes) {
 	}
 
 	SECTION("Math operators") {
+		using T = TestType;
 		using vec_t = q::Vector3<TestType>;
 		REQUIRE(one_val + three_val == vec_t(2.f, 3.f, 4.f));
 		REQUIRE(one_val - three_val == vec_t(0.f, -1.f, -2.f));
 		REQUIRE(one_val * three_val == three_val);
-		REQUIRE(one_val / three_val ==
-		        vec_t((1.f / 1.f), (1.f / 2.f), (1.f / 3.f)));
+		REQUIRE(one_val / three_val == vec_t(1.f, T(1) / T(2), T(1) / T(3)));
 		REQUIRE(-one_val == vec_t(-1.f, -1.f, -1.f));
 		REQUIRE(-three_val == vec_t(-1.f, -2.f, -3.f));
 	}
