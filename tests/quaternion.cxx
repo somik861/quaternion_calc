@@ -28,6 +28,14 @@ TEMPLATE_LIST_TEST_CASE("Quaternion", "Quaternion[template]", floatTypes) {
 
 	SECTION("C'tor equality") { REQUIRE(_scal_quat == _vec_quat); }
 
+	SECTION("Equality") {
+		REQUIRE(_scal_quat == q::Quaternion(_real, _i, _j, _k));
+		REQUIRE(one_val != q::Quaternion(_real + 1, _i, _j, _k));
+		REQUIRE(one_val != q::Quaternion(_real, _i + 1, _j, _k));
+		REQUIRE(one_val != q::Quaternion(_real, _i, _j + 1, _k));
+		REQUIRE(one_val != q::Quaternion(_real, _i, _j, _k + 1));
+	}
+
 	SECTION("String representation") {
 		REQUIRE(to_string(_scal_quat) ==
 		        fmt::format("Q({}, {})", _real, to_string(_imag)));
