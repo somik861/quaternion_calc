@@ -74,6 +74,30 @@ class Vector3 {
 	constexpr friend Vector3 operator-(const Vector3& v) {
 		return v.transformed([](auto x) { return -x; });
 	}
+	constexpr friend Vector3 operator+(T lhs, const Vector3& rhs) {
+		return rhs.transformed([lhs](auto x) { return lhs + x; });
+	}
+	constexpr friend Vector3 operator-(T lhs, const Vector3& rhs) {
+		return rhs.transformed([lhs](auto x) { return lhs - x; });
+	}
+	constexpr friend Vector3 operator*(T lhs, const Vector3& rhs) {
+		return rhs.transformed([lhs](auto x) { return lhs * x; });
+	}
+	constexpr friend Vector3 operator/(T lhs, const Vector3& rhs) {
+		return rhs.transformed([lhs](auto x) { return lhs / x; });
+	}
+	constexpr friend Vector3 operator+(const Vector3& lhs, T rhs) {
+		return lhs.transformed([rhs](auto x) { return x + rhs; });
+	}
+	constexpr friend Vector3 operator-(const Vector3& lhs, T rhs) {
+		return lhs.transformed([rhs](auto x) { return x - rhs; });
+	}
+	constexpr friend Vector3 operator*(const Vector3& lhs, T rhs) {
+		return lhs.transformed([rhs](auto x) { return x * rhs; });
+	}
+	constexpr friend Vector3 operator/(const Vector3& lhs, T rhs) {
+		return lhs.transformed([rhs](auto x) { return x / rhs; });
+	}
 
 	constexpr Vector3& operator+=(const Vector3& rhs) {
 		return _elem_wise(rhs, std::plus{});
@@ -86,6 +110,18 @@ class Vector3 {
 	}
 	constexpr Vector3& operator/=(const Vector3& rhs) {
 		return _elem_wise(rhs, std::divides{});
+	}
+	constexpr Vector3& operator+=(T rhs) {
+		return transform([rhs](auto x) { return x + rhs; });
+	}
+	constexpr Vector3& operator-=(T rhs) {
+		return transform([rhs](auto x) { return x - rhs; });
+	}
+	constexpr Vector3& operator*=(T rhs) {
+		return transform([rhs](auto x) { return x * rhs; });
+	}
+	constexpr Vector3& operator/=(T rhs) {
+		return transform([rhs](auto x) { return x / rhs; });
 	}
 
   private:
