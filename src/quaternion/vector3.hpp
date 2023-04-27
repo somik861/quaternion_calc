@@ -29,7 +29,7 @@ class Vector3 {
 		return *this;
 	}
 
-	constexpr Vector3 transformed(auto unary_op) {
+	constexpr Vector3 transformed(auto unary_op) const {
 		Vector3 cpy = *this;
 		cpy.transform(unary_op);
 		return cpy;
@@ -71,20 +71,20 @@ class Vector3 {
 	constexpr friend Vector3 operator/(const Vector3& lhs, const Vector3& rhs) {
 		return lhs._elem_wised(rhs, std::divides{});
 	}
-	constexpr friend Vector3 operator-(const Vector& v) {
+	constexpr friend Vector3 operator-(const Vector3& v) {
 		return v.transformed([](auto x) { return -x; });
 	}
 
-	constexpr Vector3& operator+(const Vector3& rhs) {
+	constexpr Vector3& operator+=(const Vector3& rhs) {
 		return _elem_wise(rhs, std::plus{});
 	}
-	constexpr Vector3& operator-(const Vector3& rhs) {
+	constexpr Vector3& operator-=(const Vector3& rhs) {
 		return _elem_wise(rhs, std::minus{});
 	}
-	constexpr Vector3& operator*(const Vector3& rhs) {
+	constexpr Vector3& operator*=(const Vector3& rhs) {
 		return _elem_wise(rhs, std::multiplies{});
 	}
-	constexpr Vector3& operator/(const Vector3& rhs) {
+	constexpr Vector3& operator/=(const Vector3& rhs) {
 		return _elem_wise(rhs, std::divides{});
 	}
 
@@ -95,9 +95,8 @@ class Vector3 {
 		return *this;
 	}
 
-	constexpr friend Vector3
-	_elem_wised(const Vector3& lhs, const Vector3& rhs, auto binary_op) {
-		Vectro3 cpy = lhs;
+	constexpr Vector3 _elem_wised(const Vector3& rhs, auto binary_op) const {
+		Vector3 cpy = *this;
 		cpy._elem_wise(rhs, binary_op);
 		return cpy;
 	}
