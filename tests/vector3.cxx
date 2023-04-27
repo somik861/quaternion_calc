@@ -96,7 +96,22 @@ TEMPLATE_LIST_TEST_CASE("Vector3", "Vector3[template]", floatTypes) {
 		cpy /= T(2);
 		REQUIRE(cpy == vec_t(2.f, 8.f, 18.f));
 
-		cpy /= three_val;
+		cpy /= three_val; // /= (1, 2, 3)
 		REQUIRE(cpy == vec_t(2.f, 4.f, 6.f));
+
+		cpy.pow(2);
+		REQUIRE(cpy == vec_t(4.f, 16.f, 36.f));
+
+		// math functions
+		REQUIRE(isclose(q::dot(three_val, three_val), T(14)));
+		REQUIRE(isclose(three_val.norm(), std::sqrt(T(14))));
+		REQUIRE(q::cross(one_val, one_val) == vec_t(0.f, 0.f, 0.f));
+		REQUIRE(q::cross(three_val, three_val) == vec_t(0.f, 0.f, 0.f));
+		REQUIRE(q::cross(one_val, three_val) == vec_t(1.f, -2.f, 1.f));
+		REQUIRE(q::cross(one_val, three_val) == -q::cross(three_val, one_val));
+
+		REQUIRE(three_val.powed(2) == vec_t(1.f, 4.f, 9.f));
+		REQUIRE(isclose(one_val.sum(), T(3)));
+		REQUIRE(isclose(three_val.sum(), T(6)));
 	}
 }

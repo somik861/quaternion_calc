@@ -6,6 +6,7 @@
 #include <cassert>
 #include <fmt/core.h>
 #include <functional>
+#include <numeric>
 #include <ostream>
 
 namespace q {
@@ -34,6 +35,25 @@ class Vector3 {
 		cpy.transform(unary_op);
 		return cpy;
 	}
+
+	T norm() const noexcept { return std::sqrt(powed(2).sum()); }
+
+	Vector3& pow(T exp) {
+		return transform([exp](auto x) { return std::pow(x, exp); });
+	}
+
+	Vector3 powed(T exp) const {
+		return transformed([exp](auto x) { return std::pow(x, exp); });
+	}
+
+	constexpr T sum() const noexcept {
+		return std::reduce(_values.begin(), _values.end());
+	}
+
+	constexpr auto begin() noexcept { return _values.begin(); }
+	constexpr auto begin() const noexcept { return _values.begin(); }
+	constexpr auto end() noexcept { return _values.end(); }
+	constexpr auto end() const noexcept { return _values.end(); }
 
 	// ============= basic operators =============
 
@@ -145,5 +165,19 @@ class Vector3 {
 
 	std::array<T, 3> _values;
 };
+
+template <typename T>
+constexpr Vector3<T> cross(const Vector3<T>& lhs,
+                           const Vector3<T>& rhs) noexcept {
+	return Vector3<T>(lhs.y() * rhs.z() - lhs.z() * rhs.y(),
+	                  lhs.z() * rhs.x() - lhs.x() * rhs.z(),
+	                  lhs.x() * rhs.y() - lhs.y() * rhs.x());
+}
+
+template <typename T>
+constexpr T dot(const Vector3<T>& lhs, const Vector3<T>& rhs) noexcept {
+	auto to_sum = lhs * rhs;
+	return std::reduce(to_sum.begin(), to_sum.end());
+}
 
 } // namespace q
