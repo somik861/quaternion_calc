@@ -30,6 +30,13 @@ TEMPLATE_LIST_TEST_CASE("Vector3", "Vector3[template]", floatTypes) {
 		REQUIRE(one_val == q::Vector3(_xyz, _xyz, _xyz));
 	}
 
+	SECTION("Equality") {
+		REQUIRE(one_val == q::Vector3(_xyz));
+		REQUIRE(one_val != q::Vector3(_xyz + 1, _xyz, _xyz));
+		REQUIRE(one_val != q::Vector3(_xyz, _xyz + 1, _xyz));
+		REQUIRE(one_val != q::Vector3(_xyz, _xyz, _xyz + 1));
+	}
+
 	SECTION("Indexing") {
 		test_vec(one_val, one_val[0], one_val[1], one_val[2]);
 		test_vec(three_val, three_val[0], three_val[1], three_val[2]);
