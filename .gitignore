@@ -1,8 +1,11 @@
 # vscode
-.vscode
+/.vscode
+
+# visual studio
+/.vs
 
 # build folders
-build*
+/build*
 
 # conan presets
-CMakeUserPresets.json
+/CMakeUserPresets.json

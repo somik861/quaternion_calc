@@ -8,4 +8,5 @@
 
 using floatTypes = std::tuple<float, double>;
 
+using q::details::isclose;
 using q::details::to_string;
