@@ -1,3 +1,4 @@
+#include "ast/node.hpp"
 #include "quaternion/quaternion.hpp"
 #include <iostream>
 
