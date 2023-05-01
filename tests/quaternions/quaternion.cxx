@@ -1,5 +1,5 @@
-#include "../src/quaternion/quaternion.hpp"
-#include "common.hxx"
+#include "../../src/quaternion/quaternion.hpp"
+#include "../common.hxx"
 #include <fmt/core.h>
 
 auto test_quat = [](auto& quat, auto x, auto vec) {

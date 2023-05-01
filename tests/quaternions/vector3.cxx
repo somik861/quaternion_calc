@@ -1,5 +1,5 @@
-#include "../src/quaternion/vector3.hpp"
-#include "common.hxx"
+#include "../../src/quaternion/vector3.hpp"
+#include "../common.hxx"
 #include <fmt/core.h>
 
 auto test_vec = [](auto& vec, auto x, auto y, auto z) {

@@ -1,5 +1,6 @@
 #pragma once
 #include "../src/quaternion/concepts.hpp"
+#include "../src/quaternion/details.hpp"
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <sstream>
