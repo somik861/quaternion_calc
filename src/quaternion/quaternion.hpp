@@ -27,7 +27,7 @@ class Quaternion {
 		return *this;
 	}
 
-	constexpr Quaternion& conjugated() const noexcept {
+	constexpr Quaternion conjugated() const noexcept {
 		auto cpy = *this;
 		return cpy.conjugate();
 	}
@@ -52,8 +52,8 @@ class Quaternion {
 		return isclose(lhs.real(), rhs.real()) && lhs.imag() == rhs.imag();
 	}
 
-	constexpr friend std::ostream& operator<<(std::ostream& os,
-	                                          const Quaternion& q) {
+	constexpr friend std::ostream&
+	operator<<(std::ostream& os, const Quaternion& q) noexcept(false) {
 		return os << fmt::format("Q({}, {})", q.real(),
 		                         details::to_string(q.imag()));
 	}
@@ -79,7 +79,7 @@ class Quaternion {
 		return {lhs.real() * rhs, lhs.imag() * rhs};
 	}
 
-	constexpr friend Quaternion operator-(const Quaternion& op) {
+	constexpr friend Quaternion operator-(const Quaternion& op) noexcept {
 		return {-op.real(), -op.imag()};
 	}
 
@@ -106,6 +106,11 @@ class Quaternion {
 	constexpr Quaternion& operator*=(T rhs) noexcept {
 		_real *= rhs;
 		_imag *= rhs;
+		return *this;
+	}
+
+	constexpr Quaternion& operator*=(const Quaternion& rhs) noexcept {
+		*this = *this * rhs;
 		return *this;
 	}
 
