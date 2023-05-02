@@ -66,7 +66,7 @@ class Vector : public INode<T> {
 			values[i] = *value;
 		}
 
-		return Vector3(values[0], values[1], values[2]);
+		return q::Vector3(values[0], values[1], values[2]);
 	}
 
   private:
