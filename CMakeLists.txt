@@ -3,6 +3,9 @@ set(CXX_STANDARD 20)
 
 project(quaternion_calc CXX)
 
+# add custom libraries
+include_directories(SYSTEM ${CMAKE_SOURCE_DIR}/include())
+
 # Boost
 find_package(Boost CONFIG REQUIRED)
 set(LIBS ${LIBS} Boost::program_options Boost::container)

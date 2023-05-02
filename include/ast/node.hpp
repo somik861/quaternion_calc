@@ -1,6 +1,6 @@
 #pragma once
-#include "../quaternion/quaternion.hpp"
 #include <concepts>
+#include <quaternion/quaternion.hpp>
 #include <variant>
 
 namespace ast {

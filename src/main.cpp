@@ -1,5 +1,5 @@
-#include "ast/node.hpp"
-#include "quaternion/quaternion.hpp"
+#include <ast/node.hpp>
 #include <iostream>
+#include <quaternion/quaternion.hpp>
 
 int main() { std::cout << "Hello world" << std::endl; }
