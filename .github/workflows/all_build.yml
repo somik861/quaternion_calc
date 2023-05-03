@@ -19,6 +19,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
+    - name: Update sources
+      run: sudo sed -i 's/jammy/kinetic/g' '/etc/apt/sources.list' && sudo apt update
+      
+    - name: Update gcc
+      run: sudo apt install gcc && gcc --version
 
     - name: Install Conan
       id: conan
@@ -30,8 +36,14 @@ jobs:
     - name: Create default profile
       run: conan profile detect --force
 
-    - name: Update profile
-      run: sed -i 's/compiler.cppstd=.*/compiler.cppstd=20/' $(conan profile path default) 
+    - name: Update standard in conan profile
+      run: sed -i 's/compiler.cppstd=.*/compiler.cppstd=20/' $(conan profile path default)
+    
+    - name: Update compiler in conan profile
+      run: sed -i 's/compiler.version=.*/compiler.version=12/' $(conan profile path default) 
+      
+    - name: Show conan profile
+      run: conan profile show
 
     - name: Install dependencies
       run: conan install ${{github.workspace}} --output-folder=${{github.workspace}}/build --build=missing
@@ -63,8 +75,6 @@ jobs:
       - name: Install Conan
         id: conan
         uses: turtlebrowser/get-conan@main
-        with:
-          version: 2.0.2 # Bug occuring at 2.0.3; will be fixed in 2.0.4
   
       - name: Conan version
         run: echo "${{ steps.conan.outputs.version }}"
@@ -74,6 +84,9 @@ jobs:
   
       - name: Update profile
         run: (Get-Content $(conan profile path default)) -replace 'compiler.cppstd=.*', 'compiler.cppstd=20' | Set-Content $(conan profile path default)
+        
+      - name: Show conan profile
+        run: conan profile show
   
       - name: Install dependencies
         run: conan install ${{github.workspace}} --output-folder=${{github.workspace}}/build --build=missing
