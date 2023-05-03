@@ -146,9 +146,21 @@ class Quaternion : public INode<T> {
   public:
 	constexpr Quaternion(uptr_t scalar, uptr_t vector)
 	    : _children{std::move(scalar), std::move(vector)}, _args_count(2) {}
-	constexpr Quaternion(uptr_t x, uptr_t i, uptr_t j, uptr_t k)
-	    : _children{std::move(x), std::move(i), std::move(j), std::move(k)},
+	constexpr Quaternion(uptr_t scalar, uptr_t i, uptr_t j, uptr_t k)
+	    : _children{std::move(scalar), std::move(i), std::move(j),
+	                std::move(k)},
 	      _args_count(4) {}
+
+	constexpr static uptr_t make_unique(uptr_t scalar, uptr_t vector) {
+		return std::make_unique<Quaternion>(std::move(scalar),
+		                                    std::move(vector));
+	}
+
+	constexpr static uptr_t
+	make_unique(uptr_t scalar, uptr_t i, uptr_t j, uptr_t k) {
+		return std::make_unique<Quaternion>(std::move(scalar), std::move(i),
+		                                    std::move(j), std::move(k));
+	}
 
 	constexpr result_t evaluate() const override {
 		scalar_t scalar = details::get_or_throw<scalar_t>(
@@ -159,18 +171,19 @@ class Quaternion : public INode<T> {
 			    _children[1]->evaluate(), 1, "Quaternion");
 
 			return quaternion_t(scalar, vector);
-
-		} else if (_args_count == 4) {
+		}
+		if (_args_count == 4) {
 			std::array<scalar_t, 3> vector;
 
 			for (std::size_t i = 1; i < 4; ++i)
 				vector[i - 1] = details::get_or_throw<scalar_t>(
 				    _children[i]->evaluate(), i, "Quaternion");
 
-			return quaternion_t(*scalar, vector[0], vector[1], vector[2]);
-		} else {
-			assert(false);
+			return quaternion_t(scalar, vector[0], vector[1], vector[2]);
 		}
+
+		assert(false);
+		throw std::runtime_error("Invalid number of arguments in Quaternion");
 	}
 
   private:
