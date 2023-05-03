@@ -47,6 +47,23 @@ constexpr std::string get_type_name(typename INode<T>::quaternion_t) {
 	return "Quaternion";
 }
 
+constexpr inline std::string int2string(int num) {
+	std::string out;
+	bool sign = num < 0;
+	num *= sign * -1;
+
+	while (num != 0) {
+		out.push_back('0' + num % 10);
+		num /= 10;
+	}
+
+	if (sign)
+		out.push_back('-');
+
+	std::ranges::reverse(out);
+	return out;
+}
+
 template <typename get_t, typename variant_t>
     requires std::is_same_v<get_t, typename INode<get_t>::scalar_t> ||
              std::is_same_v<
@@ -57,14 +74,15 @@ template <typename get_t, typename variant_t>
                  typename INode<typename get_t::value_t>::quaternion_t>
 constexpr get_t get_or_throw(const variant_t& variant,
                              int arg_num,
-                             std::string_view structure) {
+                             const std::string& structure) {
 	const get_t* value = std::get_if<get_t>(&variant);
 	if (value == nullptr) {
 		throw std::logic_error(
-		    /* fmt::format("Expected argument {} of {} to be {}; got {}",
-		                     arg_num,
-		                structure, get_type_name(*value)) */
-		    "error");
+		    std::string("Expected argument ") + details::int2string(arg_num) +
+		    " of " + structure + " to be " + details::get_type_name(*value) +
+		    "; got " +
+		    std::visit([](auto x) { return details::get_type_name(x); },
+		               variant));
 	}
 	return *value;
 }
