@@ -1,6 +1,6 @@
-#include "../src/quaternion/vector3.hpp"
-#include "common.hxx"
+#include "../common.hxx"
 #include <fmt/core.h>
+#include <quaternion/vector3.hpp>
 
 auto test_vec = [](auto& vec, auto x, auto y, auto z) {
 	auto _x = vec.x();

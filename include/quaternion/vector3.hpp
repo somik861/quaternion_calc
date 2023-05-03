@@ -13,6 +13,8 @@ namespace q {
 template <typename T>
 class Vector3 {
   public:
+	using value_t = T;
+
 	constexpr Vector3(T x, T y, T z) noexcept : _values{x, y, z} {}
 	constexpr Vector3(T xyz) noexcept : Vector3(xyz, xyz, xyz) {}
 

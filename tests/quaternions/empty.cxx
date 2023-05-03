@@ -1,7 +1,6 @@
-#include <catch2/catch_test_macros.hpp>
+#include "../common.hxx"
 
 TEST_CASE("EMPTY") {
 	static_assert(true);
 	REQUIRE(true == true);
 }
-

@@ -1,6 +1,6 @@
-#include "../src/quaternion/quaternion.hpp"
-#include "common.hxx"
+#include "../common.hxx"
 #include <fmt/core.h>
+#include <quaternion/quaternion.hpp>
 
 auto test_quat = [](auto& quat, auto x, auto vec) {
 	auto _x = quat.real();

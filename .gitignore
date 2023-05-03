@@ -3,6 +3,7 @@
 
 # visual studio
 /.vs
+/out
 
 # build folders
 /build*
