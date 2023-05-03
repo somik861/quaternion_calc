@@ -106,9 +106,9 @@ class Scalar : public INode<T> {
 template <std::floating_point T>
 class Vector : public INode<T> {
   private:
-	using INode<T>::uptr_t;
-	using INode<T>::scalar_t;
-	using INode<T>::vector_t;
+	using uptr_t = typename INode<T>::uptr_t;
+	using scalar_t = typename INode<T>::scalar_t;
+	using vector_t = typename INode<T>::vector_t;
 
   public:
 	constexpr Vector(uptr_t x, uptr_t y, uptr_t z)
@@ -137,11 +137,11 @@ class Vector : public INode<T> {
 template <typename T>
 class Quaternion : public INode<T> {
   private:
-	using INode<T>::uptr_t;
-	using INode<T>::scalar_t;
-	using INode<T>::vector_t;
-	using INode<T>::quaternion_t;
-	using INode<T>::result_t;
+	using uptr_t = typename INode<T>::uptr_t;
+	using scalar_t = typename INode<T>::scalar_t;
+	using vector_t = typename INode<T>::vector_t;
+	using quaternion_t = typename INode<T>::quaternion_t;
+	using result_t = typename INode<T>::result_t;
 
   public:
 	constexpr Quaternion(uptr_t scalar, uptr_t vector)
