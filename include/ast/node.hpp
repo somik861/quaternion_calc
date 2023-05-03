@@ -7,11 +7,12 @@
 #include <memory>
 #include <quaternion/quaternion.hpp>
 #include <quaternion/vector3.hpp>
+#include <string>
+#include <string_view>
 #include <variant>
 
 namespace ast {
 namespace node {
-
 template <std::floating_point T>
 class INode {
   public:
@@ -24,6 +25,50 @@ class INode {
 
 	virtual constexpr result_t evaluate() const = 0;
 };
+
+namespace details {
+template <typename T>
+constexpr std::string get_type_name(T) {
+	return "unknown";
+}
+
+template <typename T>
+constexpr std::string get_type_name(typename INode<T>::scalar_t) {
+	return "Scalar";
+}
+
+template <typename T>
+constexpr std::string get_type_name(typename INode<T>::vector_t) {
+	return "Vector";
+}
+
+template <typename T>
+constexpr std::string get_type_name(typename INode<T>::quaternion_t) {
+	return "Quaternion";
+}
+
+template <typename get_t, typename variant_t>
+    requires std::is_same_v<get_t, typename INode<get_t>::scalar_t> ||
+             std::is_same_v<
+                 get_t,
+                 typename INode<typename get_t::value_t>::vector_t> ||
+             std::is_same_v<
+                 get_t,
+                 typename INode<typename get_t::value_t>::quaternion_t>
+constexpr get_t get_or_throw(const variant_t& variant,
+                             int arg_num,
+                             std::string_view structure) {
+	const get_t* value = std::get_if<get_t>(&variant);
+	if (value == nullptr) {
+		throw std::logic_error(
+		    /* fmt::format("Expected argument {} of {} to be {}; got {}",
+		                     arg_num,
+		                structure, get_type_name(*value)) */
+		    "error");
+	}
+	return *value;
+}
+} // namespace details
 
 template <std::floating_point T>
 class Scalar : public INode<T> {
@@ -61,11 +106,7 @@ class Vector : public INode<T> {
 
 		for (std::size_t i = 0; i < 3; ++i) {
 			auto result = _children[i]->evaluate();
-			T* value = std::get_if<scalar_t>(&result);
-			if (value == nullptr)
-				throw std::logic_error(fmt::format(
-				    "Expected argument {} of Vector to be a Scalar", i));
-			values[i] = *value;
+			values[i] = details::get_or_throw<scalar_t>(result, i, "Vector");
 		}
 
 		return vector_t(values[0], values[1], values[2]);
@@ -92,33 +133,21 @@ class Quaternion : public INode<T> {
 	      _args_count(4) {}
 
 	constexpr result_t evaluate() const override {
-		result_t scalar_res = _children[0]->evaluate();
-		scalar_t* scalar = std::get_if<scalar_t>(&scalar_res);
-		if (scalar == nullptr)
-			throw std::logic_error(
-			    "Expected argument 0 of Quaternion to be Scalar");
+		scalar_t scalar = details::get_or_throw<scalar_t>(
+		    _children[0]->evaluate(), 0, "Quaternion");
 
 		if (_args_count == 2) {
-			result_t vector_res = _children[0]->evaluate();
-			vector_t* vector = std::get_if<vector_t>(&vector_res);
-			if (vector == nullptr)
-				throw std::logic_error(
-				    "Expected argument 1 of Quaternion to be Vector");
+			vector_t vector = details::get_or_throw<vector_t>(
+			    _children[1]->evaluate(), 1, "Quaternion");
 
-			return quaternion_t(*scalar, *vector);
+			return quaternion_t(scalar, vector);
 
 		} else if (_args_count == 4) {
 			std::array<scalar_t, 3> vector;
 
-			for (std::size_t i = 1; i < 4; ++i) {
-				auto result = _children[i]->evaluate();
-				T* value = std::get_if<scalar_t>(&result);
-				if (value == nullptr)
-					throw std::logic_error(fmt::format(
-					    "Expected argument {} of Quaternion to be a Scalar",
-					    i));
-				vector[i - 1] = *value;
-			}
+			for (std::size_t i = 1; i < 4; ++i)
+				vector[i - 1] = details::get_or_throw<scalar_t>(
+				    _children[i]->evaluate(), i, "Quaternion");
 
 			return quaternion_t(*scalar, vector[0], vector[1], vector[2]);
 		} else {
