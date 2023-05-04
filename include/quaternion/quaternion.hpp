@@ -10,9 +10,11 @@ class Quaternion {
   public:
 	using value_t = T;
 
-	Quaternion(T real, const Vector3<T>& imag) noexcept
+	constexpr Quaternion() noexcept = default;
+	constexpr Quaternion(T real, const Vector3<T>& imag) noexcept
 	    : _real(real), _imag(imag) {}
-	Quaternion(T x, T i, T j, T k) noexcept : Quaternion(x, {i, j, k}) {}
+	constexpr Quaternion(T x, T i, T j, T k) noexcept
+	    : Quaternion(x, {i, j, k}) {}
 
 	constexpr T& real() noexcept { return _real; }
 	constexpr T real() const noexcept { return _real; }

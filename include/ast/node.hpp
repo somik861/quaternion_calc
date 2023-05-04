@@ -79,7 +79,7 @@ constexpr get_t get_or_throw(const variant_t& variant,
 	if (value == nullptr) {
 		throw std::logic_error(
 		    std::string("Expected argument ") + details::int2string(arg_num) +
-		    " of " + structure + " to be " + details::get_type_name(*value) +
+		    " of " + structure + " to be " + details::get_type_name(get_t{}) +
 		    "; got " +
 		    std::visit([](auto x) { return details::get_type_name(x); },
 		               variant));
@@ -89,7 +89,7 @@ constexpr get_t get_or_throw(const variant_t& variant,
 } // namespace details
 
 template <std::floating_point T>
-class Scalar : public INode<T> {
+class Scalar final : public INode<T> {
   public:
 	constexpr Scalar(T value) : _value(value) {}
 
@@ -104,7 +104,7 @@ class Scalar : public INode<T> {
 };
 
 template <std::floating_point T>
-class Vector : public INode<T> {
+class Vector final : public INode<T> {
   private:
 	using uptr_t = typename INode<T>::uptr_t;
 	using scalar_t = typename INode<T>::scalar_t;
@@ -135,7 +135,7 @@ class Vector : public INode<T> {
 };
 
 template <typename T>
-class Quaternion : public INode<T> {
+class Quaternion final : public INode<T> {
   private:
 	using uptr_t = typename INode<T>::uptr_t;
 	using scalar_t = typename INode<T>::scalar_t;
@@ -190,6 +190,105 @@ class Quaternion : public INode<T> {
 	std::array<uptr_t, 4> _children;
 	std::size_t _args_count;
 };
+
+namespace math {
+
+template <typename T>
+class Cross final : public INode<T> {
+  private:
+	using uptr_t = typename INode<T>::uptr_t;
+	using vector_t = typename INode<T>::vector_t;
+	using result_t = typename INode<T>::result_t;
+
+  public:
+	constexpr Cross(uptr_t lhs, uptr_t rhs)
+	    : _children{std::move(lhs), std::move(rhs)} {}
+
+	constexpr static uptr_t make_unique(uptr_t lhs, uptr_t rhs) {
+		return std::make_unique<Cross>(std::move(lhs), std::move(rhs));
+	}
+
+	constexpr result_t evaluate() const override {
+		vector_t lhs =
+		    details::get_or_throw<vector_t>(_children[0], 0, "Cross");
+		vector_t rhs =
+		    details::get_or_throw<vector_t>(_children[1], 1, "Cross");
+
+		return q::cross(lhs, rhs);
+	}
+
+  private:
+	std::array<uptr_t, 2> _children;
+};
+
+template <typename T>
+class Dot final : public INode<T> {
+  private:
+	using uptr_t = typename INode<T>::uptr_t;
+	using vector_t = typename INode<T>::vector_t;
+	using result_t = typename INode<T>::result_t;
+
+  public:
+	constexpr Dot(uptr_t lhs, uptr_t rhs)
+	    : _children{std::move(lhs), std::move(rhs)} {}
+
+	constexpr static uptr_t make_unique(uptr_t lhs, uptr_t rhs) {
+		return std::make_unique<Dot>(std::move(lhs), std::move(rhs));
+	}
+
+	constexpr result_t evaluate() const override {
+		vector_t lhs = details::get_or_throw<vector_t>(_children[0], 0, "Dot");
+		vector_t rhs = details::get_or_throw<vector_t>(_children[1], 1, "Dot");
+
+		return q::dot(lhs, rhs);
+	}
+
+  private:
+	std::array<uptr_t, 2> _children;
+};
+
+template <typename T>
+class Plus final : public INode<T> {
+  private:
+	using uptr_t = typename INode<T>::uptr_t;
+	using vector_t = typename INode<T>::vector_t;
+	using result_t = typename INode<T>::result_t;
+
+  public:
+	constexpr Plus(uptr_t lhs, uptr_t rhs)
+	    : _children{std::move(lhs), std::move(rhs)} {}
+
+	constexpr static uptr_t make_unique(uptr_t lhs, uptr_t rhs) {
+		return std::make_unique<Cross>(std::move(lhs), std::move(rhs));
+	}
+
+	constexpr result_t evaluate() const override {
+		return std::visit([&](auto lhs) { return 0; }, *_children[0]);
+		/*
+		return std::visit<result_t>(
+		    [&](auto lhs) -> result_t {
+		        return std::visit<result_t>(
+		            [&](auto rhs) -> result_t {
+		                if constexpr (std::is_invocable_v<operator+, lhs, rhs>)
+		                    return lhs + rhs;
+		                else
+		                    throw std::logic_error(
+		                        std::string("Operator+ cannot be invoked with "
+		                                    "following arguments: ") +
+		                        details::get_type_name(lhs) + "; " +
+		                        details::get_type_name(rhs));
+		            },
+		            _children[1]);
+		    },
+		    _children[0]);
+		*/
+	}
+
+  private:
+	std::array<uptr_t, 2> _children;
+};
+
+} // namespace math
 
 } // namespace node
 } // namespace ast

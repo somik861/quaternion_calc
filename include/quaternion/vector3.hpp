@@ -15,6 +15,7 @@ class Vector3 {
   public:
 	using value_t = T;
 
+	constexpr Vector3() noexcept = default;
 	constexpr Vector3(T x, T y, T z) noexcept : _values{x, y, z} {}
 	constexpr Vector3(T xyz) noexcept : Vector3(xyz, xyz, xyz) {}
 
@@ -165,7 +166,7 @@ class Vector3 {
 		return cpy;
 	}
 
-	std::array<T, 3> _values;
+	std::array<T, 3> _values{};
 };
 
 template <typename T>
