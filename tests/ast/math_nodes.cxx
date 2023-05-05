@@ -1,5 +1,5 @@
 #include "../common.hxx"
-#include <ast/node.hpp>
+#include <ast/math.hpp>
 #include <variant>
 
 TEMPLATE_LIST_TEST_CASE("AST", "AST[template]", floatTypes) {
