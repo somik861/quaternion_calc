@@ -4,6 +4,7 @@
 #include <concepts>
 #include <exception>
 #include <fmt/core.h>
+#include <iostream>
 #include <memory>
 #include <quaternion/quaternion.hpp>
 #include <quaternion/vector3.hpp>
@@ -27,33 +28,39 @@ class INode {
 };
 
 namespace details {
+
 template <typename T>
 constexpr std::string get_type_name(T) {
 	return "unknown";
 }
 
 template <typename T>
-constexpr std::string get_type_name(typename INode<T>::scalar_t) {
+    requires std::is_scalar_v<T>
+constexpr std::string get_type_name(T) {
 	return "Scalar";
 }
 
 template <typename T>
-constexpr std::string get_type_name(typename INode<T>::vector_t) {
+constexpr std::string get_type_name(q::Vector3<T>) {
 	return "Vector";
 }
 
 template <typename T>
-constexpr std::string get_type_name(typename INode<T>::quaternion_t) {
+constexpr std::string get_type_name(q::Quaternion<T>) {
 	return "Quaternion";
 }
 
 constexpr inline std::string int2string(int num) {
+	if (num == 0)
+		return "0";
+
 	std::string out;
 	bool sign = num < 0;
-	num *= sign * -1;
+	if (sign) // make positive
+		num *= -1;
 
 	while (num != 0) {
-		out.push_back('0' + num % 10);
+		out.push_back('0' + (num % 10));
 		num /= 10;
 	}
 
@@ -65,16 +72,10 @@ constexpr inline std::string int2string(int num) {
 }
 
 template <typename get_t, typename variant_t>
-    requires std::is_same_v<get_t, typename INode<get_t>::scalar_t> ||
-             std::is_same_v<
-                 get_t,
-                 typename INode<typename get_t::value_t>::vector_t> ||
-             std::is_same_v<
-                 get_t,
-                 typename INode<typename get_t::value_t>::quaternion_t>
 constexpr get_t get_or_throw(const variant_t& variant,
                              int arg_num,
                              const std::string& structure) {
+
 	const get_t* value = std::get_if<get_t>(&variant);
 	if (value == nullptr) {
 		throw std::logic_error(
@@ -82,7 +83,8 @@ constexpr get_t get_or_throw(const variant_t& variant,
 		    " of " + structure + " to be " + details::get_type_name(get_t{}) +
 		    "; got " +
 		    std::visit([](auto x) { return details::get_type_name(x); },
-		               variant));
+		               variant) +
+		    ".");
 	}
 	return *value;
 }
@@ -259,29 +261,23 @@ class Plus final : public INode<T> {
 	    : _children{std::move(lhs), std::move(rhs)} {}
 
 	constexpr static uptr_t make_unique(uptr_t lhs, uptr_t rhs) {
-		return std::make_unique<Cross>(std::move(lhs), std::move(rhs));
+		return std::make_unique<Plus>(std::move(lhs), std::move(rhs));
 	}
 
 	constexpr result_t evaluate() const override {
-		return std::visit([&](auto lhs) { return 0; }, *_children[0]);
-		/*
-		return std::visit<result_t>(
-		    [&](auto lhs) -> result_t {
-		        return std::visit<result_t>(
-		            [&](auto rhs) -> result_t {
-		                if constexpr (std::is_invocable_v<operator+, lhs, rhs>)
-		                    return lhs + rhs;
-		                else
-		                    throw std::logic_error(
-		                        std::string("Operator+ cannot be invoked with "
-		                                    "following arguments: ") +
-		                        details::get_type_name(lhs) + "; " +
-		                        details::get_type_name(rhs));
-		            },
-		            _children[1]);
+		return std::visit(
+		    [](auto lhs, auto rhs) -> result_t {
+			    if constexpr (std::is_invocable_v<std::plus<>, decltype(lhs),
+			                                      decltype(rhs)>)
+				    return lhs + rhs;
+			    else
+				    throw std::logic_error(
+				        std::string("Operator+ cannot be invoked with "
+				                    "following arguments: ") +
+				        details::get_type_name(lhs) + "; " +
+				        details::get_type_name(rhs));
 		    },
-		    _children[0]);
-		*/
+		    _children[0]->evaluate(), _children[1]->evaluate());
 	}
 
   private:
