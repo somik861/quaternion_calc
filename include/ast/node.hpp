@@ -77,17 +77,16 @@ constexpr get_t get_or_throw(const variant_t& variant,
                              int arg_num,
                              const std::string& structure) {
 
-	const get_t* value = std::get_if<get_t>(&variant);
-	if (value == nullptr) {
+	if (!std::holds_alternative<get_t>(variant)) {
 		throw std::logic_error(
-		    std::string("Expected argument ") + details::int2string(arg_num) +
-		    " of " + structure + " to be " + details::get_type_name(get_t{}) +
-		    "; got " +
+		    std::string("Expecting argument ") + details::int2string(arg_num) +
+		    " of '" + structure + "' to be '" +
+		    details::get_type_name(get_t{}) + "', but got '" +
 		    std::visit([](auto x) { return details::get_type_name(x); },
 		               variant) +
-		    ".");
+		    "'.");
 	}
-	return *value;
+	return std::get<get_t>(variant);
 }
 } // namespace details
 
@@ -138,10 +137,9 @@ class Vector final : public INode<T> {
 	constexpr result_t evaluate() const override {
 		std::array<T, 3> values;
 
-		for (std::size_t i = 0; i < 3; ++i) {
-			auto result = _children[i]->evaluate();
-			values[i] = details::get_or_throw<scalar_t>(result, i, "Vector");
-		}
+		for (std::size_t i = 0; i < 3; ++i)
+			values[i] = details::get_or_throw<scalar_t>(
+			    _children[i]->evaluate(), i, "Vector");
 
 		return vector_t(values[0], values[1], values[2]);
 	}
