@@ -25,6 +25,7 @@ class INode {
 	using ptr_t = INode*;
 
 	virtual constexpr result_t evaluate() const = 0;
+	virtual constexpr uptr_t copy_unique() const = 0;
 };
 
 namespace details {
@@ -92,14 +93,21 @@ constexpr get_t get_or_throw(const variant_t& variant,
 
 template <std::floating_point T>
 class Scalar final : public INode<T> {
+  private:
+	using uptr_t = typename INode<T>::uptr_t;
+	using result_t = typename INode<T>::result_t;
+
   public:
 	constexpr Scalar(T value) : _value(value) {}
 
-	constexpr static INode<T>::uptr_t make_unique(T value) {
+	constexpr static uptr_t make_unique(T value) {
 		return std::make_unique<Scalar>(value);
 	}
 
-	constexpr INode<T>::result_t evaluate() const override { return _value; }
+	constexpr uptr_t copy_unique() const override {
+		return Scalar<T>::make_unique(_value);
+	}
+	constexpr result_t evaluate() const override { return _value; }
 
   private:
 	T _value;
@@ -109,6 +117,7 @@ template <std::floating_point T>
 class Vector final : public INode<T> {
   private:
 	using uptr_t = typename INode<T>::uptr_t;
+	using result_t = typename INode<T>::result_t;
 	using scalar_t = typename INode<T>::scalar_t;
 	using vector_t = typename INode<T>::vector_t;
 
@@ -121,7 +130,12 @@ class Vector final : public INode<T> {
 		                                std::move(z));
 	}
 
-	constexpr INode<T>::result_t evaluate() const override {
+	constexpr uptr_t copy_unique() const override {
+		return Vector<T>::make_unique(_children[0]->copy_unique(),
+		                              _children[1]->copy_unique(),
+		                              _children[2]->copy_unique());
+	}
+	constexpr result_t evaluate() const override {
 		std::array<T, 3> values;
 
 		for (std::size_t i = 0; i < 3; ++i) {
@@ -136,7 +150,7 @@ class Vector final : public INode<T> {
 	std::array<uptr_t, 3> _children;
 };
 
-template <typename T>
+template <std::floating_point T>
 class Quaternion final : public INode<T> {
   private:
 	using uptr_t = typename INode<T>::uptr_t;
@@ -164,6 +178,19 @@ class Quaternion final : public INode<T> {
 		                                    std::move(j), std::move(k));
 	}
 
+	constexpr uptr_t copy_unique() const override {
+		if (_args_count == 2)
+			return Quaternion<T>::make_unique(_children[0]->copy_unique(),
+			                                  _children[1]->copy_unique());
+
+		if (_args_count == 4)
+			return Quaternion<T>::make_unique(
+			    _children[0]->copy_unique(), _children[1]->copy_unique(),
+			    _children[2]->copy_unique(), _children[3]->copy_unique());
+
+		assert(false);
+		throw std::runtime_error("Invalid number of arguments in Quaternion");
+	}
 	constexpr result_t evaluate() const override {
 		scalar_t scalar = details::get_or_throw<scalar_t>(
 		    _children[0]->evaluate(), 0, "Quaternion");

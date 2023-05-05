@@ -18,6 +18,10 @@ class Cross final : public INode<T> {
 		return std::make_unique<Cross>(std::move(lhs), std::move(rhs));
 	}
 
+	constexpr uptr_t copy_unique() const override {
+		return Cross<T>::make_unique(_children[0]->copy_unique(),
+		                             _children[1]->copy_unique());
+	}
 	constexpr result_t evaluate() const override {
 		vector_t lhs =
 		    details::get_or_throw<vector_t>(_children[0], 0, "Cross");
@@ -46,6 +50,10 @@ class Dot final : public INode<T> {
 		return std::make_unique<Dot>(std::move(lhs), std::move(rhs));
 	}
 
+	constexpr uptr_t copy_unique() const override {
+		return Dot<T>::make_unique(_children[0]->copy_unique(),
+		                           _children[1]->copy_unique());
+	}
 	constexpr result_t evaluate() const override {
 		vector_t lhs = details::get_or_throw<vector_t>(_children[0], 0, "Dot");
 		vector_t rhs = details::get_or_throw<vector_t>(_children[1], 1, "Dot");
@@ -70,6 +78,11 @@ class Plus final : public INode<T> {
 
 	constexpr static uptr_t make_unique(uptr_t lhs, uptr_t rhs) {
 		return std::make_unique<Plus>(std::move(lhs), std::move(rhs));
+	}
+
+	constexpr uptr_t copy_unique() const override {
+		return Plus<T>::make_unique(_children[0]->copy_unique(),
+		                            _children[1]->copy_unique());
 	}
 
 	constexpr result_t evaluate() const override {
