@@ -4,6 +4,7 @@
 #include <concepts>
 #include <exception>
 #include <fmt/core.h>
+#include <iostream>
 #include <memory>
 #include <quaternion/quaternion.hpp>
 #include <quaternion/vector3.hpp>
@@ -24,36 +25,43 @@ class INode {
 	using ptr_t = INode*;
 
 	virtual constexpr result_t evaluate() const = 0;
+	virtual constexpr uptr_t copy_unique() const = 0;
 };
 
 namespace details {
+
 template <typename T>
 constexpr std::string get_type_name(T) {
 	return "unknown";
 }
 
 template <typename T>
-constexpr std::string get_type_name(typename INode<T>::scalar_t) {
+    requires std::is_scalar_v<T>
+constexpr std::string get_type_name(T) {
 	return "Scalar";
 }
 
 template <typename T>
-constexpr std::string get_type_name(typename INode<T>::vector_t) {
+constexpr std::string get_type_name(q::Vector3<T>) {
 	return "Vector";
 }
 
 template <typename T>
-constexpr std::string get_type_name(typename INode<T>::quaternion_t) {
+constexpr std::string get_type_name(q::Quaternion<T>) {
 	return "Quaternion";
 }
 
 constexpr inline std::string int2string(int num) {
+	if (num == 0)
+		return "0";
+
 	std::string out;
 	bool sign = num < 0;
-	num *= sign * -1;
+	if (sign) // make positive
+		num *= -1;
 
 	while (num != 0) {
-		out.push_back('0' + num % 10);
+		out.push_back('0' + (num % 10));
 		num /= 10;
 	}
 
@@ -65,48 +73,50 @@ constexpr inline std::string int2string(int num) {
 }
 
 template <typename get_t, typename variant_t>
-    requires std::is_same_v<get_t, typename INode<get_t>::scalar_t> ||
-             std::is_same_v<
-                 get_t,
-                 typename INode<typename get_t::value_t>::vector_t> ||
-             std::is_same_v<
-                 get_t,
-                 typename INode<typename get_t::value_t>::quaternion_t>
 constexpr get_t get_or_throw(const variant_t& variant,
                              int arg_num,
                              const std::string& structure) {
-	const get_t* value = std::get_if<get_t>(&variant);
-	if (value == nullptr) {
+
+	if (!std::holds_alternative<get_t>(variant)) {
 		throw std::logic_error(
-		    std::string("Expected argument ") + details::int2string(arg_num) +
-		    " of " + structure + " to be " + details::get_type_name(*value) +
-		    "; got " +
+		    std::string("Expecting argument ") + details::int2string(arg_num) +
+		    " of '" + structure + "' to be '" +
+		    details::get_type_name(get_t{}) + "', but got '" +
 		    std::visit([](auto x) { return details::get_type_name(x); },
-		               variant));
+		               variant) +
+		    "'.");
 	}
-	return *value;
+	return std::get<get_t>(variant);
 }
 } // namespace details
 
 template <std::floating_point T>
-class Scalar : public INode<T> {
+class Scalar final : public INode<T> {
+  private:
+	using uptr_t = typename INode<T>::uptr_t;
+	using result_t = typename INode<T>::result_t;
+
   public:
 	constexpr Scalar(T value) : _value(value) {}
 
-	constexpr static INode<T>::uptr_t make_unique(T value) {
+	constexpr static uptr_t make_unique(T value) {
 		return std::make_unique<Scalar>(value);
 	}
 
-	constexpr INode<T>::result_t evaluate() const override { return _value; }
+	constexpr uptr_t copy_unique() const override {
+		return Scalar<T>::make_unique(_value);
+	}
+	constexpr result_t evaluate() const override { return _value; }
 
   private:
 	T _value;
 };
 
 template <std::floating_point T>
-class Vector : public INode<T> {
+class Vector final : public INode<T> {
   private:
 	using uptr_t = typename INode<T>::uptr_t;
+	using result_t = typename INode<T>::result_t;
 	using scalar_t = typename INode<T>::scalar_t;
 	using vector_t = typename INode<T>::vector_t;
 
@@ -119,13 +129,17 @@ class Vector : public INode<T> {
 		                                std::move(z));
 	}
 
-	constexpr INode<T>::result_t evaluate() const override {
+	constexpr uptr_t copy_unique() const override {
+		return Vector<T>::make_unique(_children[0]->copy_unique(),
+		                              _children[1]->copy_unique(),
+		                              _children[2]->copy_unique());
+	}
+	constexpr result_t evaluate() const override {
 		std::array<T, 3> values;
 
-		for (std::size_t i = 0; i < 3; ++i) {
-			auto result = _children[i]->evaluate();
-			values[i] = details::get_or_throw<scalar_t>(result, i, "Vector");
-		}
+		for (std::size_t i = 0; i < 3; ++i)
+			values[i] = details::get_or_throw<scalar_t>(
+			    _children[i]->evaluate(), i, "Vector");
 
 		return vector_t(values[0], values[1], values[2]);
 	}
@@ -134,8 +148,8 @@ class Vector : public INode<T> {
 	std::array<uptr_t, 3> _children;
 };
 
-template <typename T>
-class Quaternion : public INode<T> {
+template <std::floating_point T>
+class Quaternion final : public INode<T> {
   private:
 	using uptr_t = typename INode<T>::uptr_t;
 	using scalar_t = typename INode<T>::scalar_t;
@@ -162,6 +176,19 @@ class Quaternion : public INode<T> {
 		                                    std::move(j), std::move(k));
 	}
 
+	constexpr uptr_t copy_unique() const override {
+		if (_args_count == 2)
+			return Quaternion<T>::make_unique(_children[0]->copy_unique(),
+			                                  _children[1]->copy_unique());
+
+		if (_args_count == 4)
+			return Quaternion<T>::make_unique(
+			    _children[0]->copy_unique(), _children[1]->copy_unique(),
+			    _children[2]->copy_unique(), _children[3]->copy_unique());
+
+		assert(false);
+		throw std::runtime_error("Invalid number of arguments in Quaternion");
+	}
 	constexpr result_t evaluate() const override {
 		scalar_t scalar = details::get_or_throw<scalar_t>(
 		    _children[0]->evaluate(), 0, "Quaternion");
