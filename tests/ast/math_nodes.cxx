@@ -76,6 +76,16 @@ TEMPLATE_LIST_TEST_CASE("AST", "AST[template]", floatTypes) {
 			REQUIRE(value != nullptr);
 			REQUIRE(isclose(*value, scalar_1_raw / scalar_2_raw));
 		}
+
+		{
+			uptr_t node = ast::node::math::Pow<T>::make_unique(
+			    scalar_1->copy_unique(), scalar_2->copy_unique());
+
+			result_t result = node->evaluate();
+			scalar_t* value = std::get_if<scalar_t>(&result);
+			REQUIRE(value != nullptr);
+			REQUIRE(isclose(*value, std::pow(scalar_1_raw, scalar_2_raw)));
+		}
 	}
 
 	SECTION("Binary operators on vectors") {
@@ -211,6 +221,16 @@ TEMPLATE_LIST_TEST_CASE("AST", "AST[template]", floatTypes) {
 			vector_t* value = std::get_if<vector_t>(&result);
 			REQUIRE(value != nullptr);
 			REQUIRE(*value == (vector_1_raw / scalar_2_raw));
+		}
+
+		{
+			uptr_t node = ast::node::math::Pow<T>::make_unique(
+			    vector_1->copy_unique(), scalar_2->copy_unique());
+
+			result_t result = node->evaluate();
+			vector_t* value = std::get_if<vector_t>(&result);
+			REQUIRE(value != nullptr);
+			REQUIRE(*value == vector_1_raw.powed(scalar_2_raw));
 		}
 	}
 
