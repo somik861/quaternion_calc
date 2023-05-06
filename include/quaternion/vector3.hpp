@@ -17,7 +17,7 @@ class Vector3 {
 
 	constexpr Vector3() noexcept = default;
 	constexpr Vector3(T x, T y, T z) noexcept : _values{x, y, z} {}
-	constexpr Vector3(T xyz) noexcept : Vector3(xyz, xyz, xyz) {}
+	constexpr explicit Vector3(T xyz) noexcept : Vector3(xyz, xyz, xyz) {}
 
 	constexpr T& x() noexcept { return _values[0]; }
 	constexpr T x() const noexcept { return _values[0]; }
