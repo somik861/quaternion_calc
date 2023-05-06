@@ -36,6 +36,80 @@ TEMPLATE_LIST_TEST_CASE("AST", "AST[template]", floatTypes) {
 	uptr_t quat_2 = ast::node::Quaternion<T>::make_unique(
 	    scalar_2->copy_unique(), vector_2->copy_unique());
 
+	SECTION("Unary operators on vectors") {
+		{
+			uptr_t node =
+			    ast::node::math::Norm<T>::make_unique(vector_1->copy_unique());
+
+			result_t result = node->evaluate();
+			scalar_t* value = std::get_if<scalar_t>(&result);
+			REQUIRE(value != nullptr);
+			REQUIRE(isclose(*value, vector_1_raw.norm()));
+		}
+
+		{
+			uptr_t node =
+			    ast::node::math::Sum<T>::make_unique(vector_1->copy_unique());
+
+			result_t result = node->evaluate();
+			scalar_t* value = std::get_if<scalar_t>(&result);
+			REQUIRE(value != nullptr);
+			REQUIRE(isclose(*value, vector_1_raw.sum()));
+		}
+	}
+
+	SECTION("Unary operators on quaternions") {
+		{
+			uptr_t node =
+			    ast::node::math::Norm<T>::make_unique(quat_1->copy_unique());
+
+			result_t result = node->evaluate();
+			scalar_t* value = std::get_if<scalar_t>(&result);
+			REQUIRE(value != nullptr);
+			REQUIRE(isclose(*value, quat_1_raw.norm()));
+		}
+
+		{
+			uptr_t node = ast::node::math::Conjugate<T>::make_unique(
+			    quat_1->copy_unique());
+
+			result_t result = node->evaluate();
+			quaternion_t* value = std::get_if<quaternion_t>(&result);
+			REQUIRE(value != nullptr);
+			REQUIRE(*value == quat_1_raw.conjugated());
+		}
+
+		{
+			uptr_t node = ast::node::math::Reciprocal<T>::make_unique(
+			    quat_1->copy_unique());
+
+			result_t result = node->evaluate();
+			quaternion_t* value = std::get_if<quaternion_t>(&result);
+			REQUIRE(value != nullptr);
+			REQUIRE(*value == quat_1_raw.reciprocaled());
+		}
+
+		{
+			uptr_t node =
+			    ast::node::math::Real<T>::make_unique(quat_1->copy_unique());
+
+			result_t result = node->evaluate();
+			scalar_t* value = std::get_if<scalar_t>(&result);
+			REQUIRE(value != nullptr);
+			REQUIRE(isclose(*value, quat_1_raw.real()));
+		}
+
+		{
+			uptr_t node =
+			    ast::node::math::Imag<T>::make_unique(quat_1->copy_unique());
+
+			result_t result = node->evaluate();
+			vector_t* value = std::get_if<vector_t>(&result);
+			REQUIRE(value != nullptr);
+			REQUIRE(*value == quat_1_raw.imag());
+		}
+	}
+
 	SECTION("Binary operators on scalars") {
 		{
 			uptr_t node = ast::node::math::Plus<T>::make_unique(

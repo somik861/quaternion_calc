@@ -214,7 +214,7 @@ class UnaryOperation final : public INode<T> {
 	constexpr result_t evaluate() const override {
 		return std::visit(
 		    [](auto arg) -> result_t {
-			    if constexpr (std::is_invocable_v<unary_op, arg>)
+			    if constexpr (std::is_invocable_v<unary_op, decltype(arg)>)
 				    return unary_op{}(arg);
 			    else
 				    throw std::logic_error(
