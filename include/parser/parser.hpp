@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <string_view>
 
-namespace parser {
+namespace prsr {
 class Parser {
   private:
 	using T = float;
@@ -104,4 +104,4 @@ class Parser {
 	const static inline boost::container::flat_set<char> DIGITS{
 	    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 };
-} // namespace parser
+} // namespace prsr
