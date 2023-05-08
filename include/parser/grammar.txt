@@ -1,0 +1,14 @@
+s = " " | "\n" | "\t" | "\r" | "\f" | "\b";
+S = s*
+
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+scalar = digit+ ( ".", digit* ) ? ;
+vector = "["S scalar S "," S scalar S "," S scalar S "]" ;
+quaternion = "Q(" S scalar S "," S vector S ")" ;
+
+unary_op = ?op_name?"(" S elem S ")"
+binary_op = ?op_name?"(" S elem S "," S elem S ")" | elem S ?op_infix? S elem
+
+elem = scalar, vector, quaternion, unary_op, binary_op
+
+ROOT: elem
