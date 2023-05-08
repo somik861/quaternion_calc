@@ -1,5 +1,7 @@
 #include "../common.hxx"
 #include <parser/parser.hpp>
+#include <quaternion/quaternion.hpp>
+#include <quaternion/vector3.hpp>
 #include <string_view>
 
 template <typename get_t, typename parser_t>
@@ -11,11 +13,21 @@ get_t parse_evaluate(std::string_view sv) {
 
 TEMPLATE_LIST_TEST_CASE("Parser", "Parser[template]", floatTypes) {
 	using T = TestType;
+	using vec_t = q::Vector3<T>;
 
 	SECTION("Scalar") {
 		REQUIRE(isclose(T(1), parse_evaluate<T, T>("1")));
 		REQUIRE(isclose(T(1.453), parse_evaluate<T, T>("  1.453  ")));
 		REQUIRE(isclose(T(0.453), parse_evaluate<T, T>("0.453  ")));
 		REQUIRE(isclose(T(-15.222), parse_evaluate<T, T>("   -15.222")));
+	}
+
+	SECTION("Vector") {
+		REQUIRE(vec_t(1, 2, 3) == parse_evaluate<vec_t, T>("[ 1, 2  , 3  ]"));
+		REQUIRE(vec_t(-1.453, -98, -12.5) ==
+		        parse_evaluate<vec_t, T>("[-1.453, -98, -12.5  ]"));
+		REQUIRE(vec_t(3, 1, 2) == parse_evaluate<vec_t, T>("  [3,1,2]  "));
+		REQUIRE(vec_t(4, 3, 3.123) ==
+		        parse_evaluate<vec_t, T>("[  4,        3,      3.123]"));
 	}
 }

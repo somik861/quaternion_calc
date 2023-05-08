@@ -3,8 +3,8 @@ S = s*
 
 digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 scalar = "-" ? digit+ ( ".", digit* ) ? ;
-vector = "[" S scalar S "," S scalar S "," S scalar S "]" ;
-quaternion = "Q(" S scalar S "," S vector S ")" ;
+vector = "[" S elem S "," S elem S "," S elem S "]" ;
+quaternion = "Q(" S elem S "," S elem S ")" ;
 
 
 unary_op = ?op_name?"(" S elem S ")"

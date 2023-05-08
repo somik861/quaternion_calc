@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <ast/node.hpp>
 #include <boost/container/flat_set.hpp>
 #include <boost/lexical_cast.hpp>
@@ -38,7 +39,7 @@ class Parser {
 		if (DIGITS.contains(ch) || ch == '-')
 			return _parse_scalar();
 		if (ch == '[')
-			return nullptr; // parse vector
+			return _parse_vector(); // parse vector
 		if (ch == 'Q')
 			return nullptr; // parse quaternion
 		return nullptr;     // parse operation
@@ -63,6 +64,16 @@ class Parser {
 		}
 
 		return ast::node::Scalar<T>::make_unique(boost::lexical_cast<T>(str));
+	}
+
+	uptr_t _parse_vector() {
+		_require('[');
+
+		auto nodes = _get_nodes<3>();
+
+		_require(']');
+		return ast::node::Vector<T>::make_unique(
+		    std::move(nodes[0]), std::move(nodes[1]), std::move(nodes[2]));
 	}
 
 	void _skip_whitespaces() {
@@ -101,6 +112,20 @@ class Parser {
 	}
 	constexpr std::size_t _current_idx() const {
 		return _original_size - _buffer.size();
+	}
+
+	template <std::size_t N>
+	constexpr std::array<uptr_t, N> _get_nodes() {
+		std::array<uptr_t, N> nodes;
+		for (std::size_t i = 0; i < nodes.size(); ++i) {
+			_skip_whitespaces();
+			nodes[i] = _parse_elem();
+			_skip_whitespaces();
+			if (i != N - 1)
+				_require(',');
+		}
+
+		return nodes;
 	}
 
 	std::string_view _buffer;
