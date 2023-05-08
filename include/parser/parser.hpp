@@ -41,8 +41,8 @@ class Parser {
 		if (ch == '[')
 			return _parse_vector(); // parse vector
 		if (ch == 'Q')
-			return nullptr; // parse quaternion
-		return nullptr;     // parse operation
+			return _parse_quaternion(); // parse quaternion
+		return nullptr;                 // parse operation
 	}
 
 	uptr_t _parse_scalar() {
@@ -74,6 +74,28 @@ class Parser {
 		_require(']');
 		return ast::node::Vector<T>::make_unique(
 		    std::move(nodes[0]), std::move(nodes[1]), std::move(nodes[2]));
+	}
+
+	uptr_t _parse_quaternion() {
+		uptr_t rv;
+		_require('Q');
+		_require('(');
+
+		auto nodes = _get_nodes<2>();
+
+		if (_peek() != ',') { // 2-value c'tor
+			rv = ast::node::Quaternion<T>::make_unique(std::move(nodes[0]),
+			                                           std::move(nodes[1]));
+		} else { // 4-value c'tor
+			_skip();
+			auto second_nodes = _get_nodes<2>();
+			rv = ast::node::Quaternion<T>::make_unique(
+			    std::move(nodes[0]), std::move(nodes[1]),
+			    std::move(second_nodes[0]), std::move(second_nodes[1]));
+		}
+
+		_require(')');
+		return rv;
 	}
 
 	void _skip_whitespaces() {

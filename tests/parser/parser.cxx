@@ -14,6 +14,7 @@ get_t parse_evaluate(std::string_view sv) {
 TEMPLATE_LIST_TEST_CASE("Parser", "Parser[template]", floatTypes) {
 	using T = TestType;
 	using vec_t = q::Vector3<T>;
+	using quat_t = q::Quaternion<T>;
 
 	SECTION("Scalar") {
 		REQUIRE(isclose(T(1), parse_evaluate<T, T>("1")));
@@ -29,5 +30,16 @@ TEMPLATE_LIST_TEST_CASE("Parser", "Parser[template]", floatTypes) {
 		REQUIRE(vec_t(3, 1, 2) == parse_evaluate<vec_t, T>("  [3,1,2]  "));
 		REQUIRE(vec_t(4, 3, 3.123) ==
 		        parse_evaluate<vec_t, T>("[  4,        3,      3.123]"));
+	}
+
+	SECTION("Quaternion") {
+		REQUIRE(quat_t(1, 2, 3, 4) ==
+		        parse_evaluate<quat_t, T>("Q(1, 2, 3, 4)"));
+		REQUIRE(quat_t(1, 2, 3, 4) ==
+		        parse_evaluate<quat_t, T>("Q(1, [2, 3, 4])"));
+		REQUIRE(quat_t(-1, 2, 3, 4) ==
+		        parse_evaluate<quat_t, T>("Q(-1, 2, 3, 4)"));
+		REQUIRE(quat_t(-1, 2, 3, 4) ==
+		        parse_evaluate<quat_t, T>("Q(-1, [2, 3, 4])"));
 	}
 }
