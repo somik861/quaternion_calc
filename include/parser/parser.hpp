@@ -8,9 +8,9 @@
 #include <string_view>
 
 namespace prsr {
+template <typename T>
 class Parser {
   private:
-	using T = float;
 	using uptr_t = typename ast::node::INode<T>::uptr_t;
 
   public:

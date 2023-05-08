@@ -7,7 +7,7 @@
 
 int main(int argc, char** argv) {
 	using T = float;
-	prsr::Parser parser;
+	prsr::Parser<T> parser;
 
 	try {
 		auto result = parser.parse(argv[1])->evaluate();
