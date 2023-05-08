@@ -102,10 +102,12 @@ class Parser {
 	uptr_t _parse_prefix_operation() {
 		std::string op_name;
 		char ch;
-		while (_is_letter(_peek()))
+		while (_is_letter(_peek())) {
 			op_name.push_back(_consume());
+		}
 
 		_require('(');
+
 		uptr_t rv;
 		// Unary prefix functions
 		if (op_name == "Norm")
@@ -126,8 +128,32 @@ class Parser {
 		else if (op_name == "Imag")
 			rv = ast::node::math::Imag<T>::make_unique(
 			    std::move(_get_nodes<1>()[0]));
+		else {
 
-		// Binary prefix functions
+			// Binary prefix functions
+			auto nodes = _get_nodes<2>();
+			if (op_name == "Plus")
+				rv = ast::node::math::Plus<T>::make_unique(std::move(nodes[0]),
+				                                           std::move(nodes[1]));
+			if (op_name == "Minus")
+				rv = ast::node::math::Minus<T>::make_unique(
+				    std::move(nodes[0]), std::move(nodes[1]));
+			if (op_name == "Multiplies")
+				rv = ast::node::math::Multiplies<T>::make_unique(
+				    std::move(nodes[0]), std::move(nodes[1]));
+			if (op_name == "Divides")
+				rv = ast::node::math::Divides<T>::make_unique(
+				    std::move(nodes[0]), std::move(nodes[1]));
+			if (op_name == "Cross")
+				rv = ast::node::math::Cross<T>::make_unique(
+				    std::move(nodes[0]), std::move(nodes[1]));
+			if (op_name == "Dot")
+				rv = ast::node::math::Dot<T>::make_unique(std::move(nodes[0]),
+				                                          std::move(nodes[1]));
+			if (op_name == "Pow")
+				rv = ast::node::math::Pow<T>::make_unique(std::move(nodes[0]),
+				                                          std::move(nodes[1]));
+		}
 		_require(')');
 
 		if (rv == nullptr)
@@ -178,7 +204,7 @@ class Parser {
 	template <std::size_t N>
 	constexpr std::array<uptr_t, N> _get_nodes() {
 		std::array<uptr_t, N> nodes;
-		for (std::size_t i = 0; i < nodes.size(); ++i) {
+		for (std::size_t i = 0; i < N; ++i) {
 			_skip_whitespaces();
 			nodes[i] = _parse_elem();
 			_skip_whitespaces();

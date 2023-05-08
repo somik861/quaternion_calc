@@ -59,4 +59,20 @@ TEMPLATE_LIST_TEST_CASE("Parser", "Parser[template]", floatTypes) {
 		REQUIRE(quat_t(1, 2, 3, 4).imag() ==
 		        parse_evaluate<vec_t, T>("Imag(Q(1, [2,3,4]))"));
 	}
+
+	SECTION("Binary prefix functions") {
+		REQUIRE(isclose(T(2), parse_evaluate<T, T>("Plus(1, 1)")));
+		REQUIRE(isclose(T(0), parse_evaluate<T, T>("Minus(1, 1)")));
+		REQUIRE(isclose(T(1), parse_evaluate<T, T>("Multiplies(1, 1)")));
+		REQUIRE(isclose(T(1), parse_evaluate<T, T>("Divides(1, 1)")));
+
+		REQUIRE(q::cross(vec_t(1, 2, 3), vec_t(2, 2, 1)) ==
+		        parse_evaluate<vec_t, T>("Cross([1,2,3], [2,2,1])"));
+
+		REQUIRE(isclose(q::dot(vec_t(1, 2, 3), vec_t(2, 2, 1)),
+		                parse_evaluate<T, T>("Dot([1,2,3], [2,2,1])")));
+
+		REQUIRE(vec_t(1, 2, 3).powed(2) ==
+		        parse_evaluate<vec_t, T>("Pow([1,2,3], 2)"));
+	}
 }
