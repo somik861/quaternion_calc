@@ -24,7 +24,7 @@ class Parser {
 
 		if (_available())
 			throw std::logic_error(fmt::format(
-			    "Expected end of the line at position {}", _current_idx()));
+			    "Expected the line to end at position {}", _current_idx()));
 
 		sv = "";
 		return rv;
@@ -35,7 +35,7 @@ class Parser {
 	uptr_t _parse_elem() {
 		char ch = _peek();
 
-		if (DIGITS.contains(ch))
+		if (DIGITS.contains(ch) || ch == '-')
 			return _parse_scalar();
 		if (ch == '[')
 			return nullptr; // parse vector
@@ -48,11 +48,17 @@ class Parser {
 		bool dot_seen = false;
 		std::string str;
 
-		char ch = _peek();
-		while (DIGITS.contains(ch) && (ch == '.' && !dot_seen)) {
+		while (_available()) {
+			char ch = _peek();
+			// not a digit, dot or a sign
+			if (!(DIGITS.contains(ch) || (ch == '.' && !dot_seen) ||
+			      (ch == '-' && str.empty())))
+				break;
+
 			if (ch == '.')
 				dot_seen = true;
 			str.push_back(ch);
+
 			_skip();
 		}
 

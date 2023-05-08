@@ -5,14 +5,14 @@
 #include <quaternion/quaternion.hpp>
 #include <variant>
 
-int main() {
+int main(int argc, char** argv) {
 	using T = float;
 	prsr::Parser parser;
 
 	try {
-		auto result = parser.parse("123")->evaluate();
+		auto result = parser.parse(argv[1])->evaluate();
 		std::visit([](auto x) { std::cout << x << '\n'; }, result);
-	} catch (const std::logic_error& e) {
+	} catch (const std::exception& e) {
 		std::cout << e.what() << '\n';
 	}
 }
