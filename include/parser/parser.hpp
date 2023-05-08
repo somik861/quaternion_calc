@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <ast/math.hpp>
 #include <ast/node.hpp>
 #include <boost/container/flat_set.hpp>
 #include <boost/lexical_cast.hpp>
@@ -41,8 +42,8 @@ class Parser {
 		if (ch == '[')
 			return _parse_vector(); // parse vector
 		if (ch == 'Q')
-			return _parse_quaternion(); // parse quaternion
-		return nullptr;                 // parse operation
+			return _parse_quaternion();   // parse quaternion
+		return _parse_prefix_operation(); // parse operation
 	}
 
 	uptr_t _parse_scalar() {
@@ -98,6 +99,44 @@ class Parser {
 		return rv;
 	}
 
+	uptr_t _parse_prefix_operation() {
+		std::string op_name;
+		char ch;
+		while (_is_letter(_peek()))
+			op_name.push_back(_consume());
+
+		_require('(');
+		uptr_t rv;
+		// Unary prefix functions
+		if (op_name == "Norm")
+			rv = ast::node::math::Norm<T>::make_unique(
+			    std::move(std::move(_get_nodes<1>()[0])));
+		else if (op_name == "Sum")
+			rv = ast::node::math::Sum<T>::make_unique(
+			    std::move(_get_nodes<1>()[0]));
+		else if (op_name == "Reciprocal")
+			rv = ast::node::math::Reciprocal<T>::make_unique(
+			    std::move(_get_nodes<1>()[0]));
+		else if (op_name == "Conjugate")
+			rv = ast::node::math::Conjugate<T>::make_unique(
+			    std::move(_get_nodes<1>()[0]));
+		else if (op_name == "Real")
+			rv = ast::node::math::Real<T>::make_unique(
+			    std::move(_get_nodes<1>()[0]));
+		else if (op_name == "Imag")
+			rv = ast::node::math::Imag<T>::make_unique(
+			    std::move(_get_nodes<1>()[0]));
+
+		// Binary prefix functions
+		_require(')');
+
+		if (rv == nullptr)
+			throw std::logic_error(
+			    fmt::format("Unknown function: '{}'", op_name));
+
+		return rv;
+	}
+
 	void _skip_whitespaces() {
 		while (_available() && WHITESPACES.contains(_peek()))
 			_skip();
@@ -148,6 +187,10 @@ class Parser {
 		}
 
 		return nodes;
+	}
+
+	constexpr bool _is_letter(char ch) const {
+		return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z');
 	}
 
 	std::string_view _buffer;

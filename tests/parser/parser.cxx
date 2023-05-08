@@ -42,4 +42,21 @@ TEMPLATE_LIST_TEST_CASE("Parser", "Parser[template]", floatTypes) {
 		REQUIRE(quat_t(-1, 2, 3, 4) ==
 		        parse_evaluate<quat_t, T>("Q(-1, [2, 3, 4])"));
 	}
+
+	SECTION("Unary prefix functions") {
+		REQUIRE(isclose(vec_t(1, 2, 3).norm(),
+		                parse_evaluate<T, T>("Norm([1,2,3])")));
+		REQUIRE(isclose(quat_t(1, 2, 3, 4).norm(),
+		                parse_evaluate<T, T>("Norm(Q(1, [2,3,4]))")));
+		REQUIRE(isclose(vec_t(1, 2, 3).sum(),
+		                parse_evaluate<T, T>("Sum([1,2,3])")));
+		REQUIRE(quat_t(1, 2, 3, 4).reciprocaled() ==
+		        parse_evaluate<quat_t, T>("Reciprocal(Q(1, [2,3,4]))"));
+		REQUIRE(quat_t(1, 2, 3, 4).conjugated() ==
+		        parse_evaluate<quat_t, T>("Conjugate(Q(1, [2,3,4]))"));
+		REQUIRE(isclose(quat_t(1, 2, 3, 4).real(),
+		                parse_evaluate<T, T>("Real(Q(1, [2,3,4]))")));
+		REQUIRE(quat_t(1, 2, 3, 4).imag() ==
+		        parse_evaluate<vec_t, T>("Imag(Q(1, [2,3,4]))"));
+	}
 }
