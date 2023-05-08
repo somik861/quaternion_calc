@@ -1,6 +1,7 @@
 #include <ast/math.hpp>
 #include <ast/node.hpp>
 #include <iostream>
+#include <parser/parser.hpp>
 #include <quaternion/quaternion.hpp>
 #include <variant>
 
